@@ -1,37 +1,56 @@
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
-import { isCloudinaryConfigured, uploadImageToCloudinary } from "./cloudinary";
+import {
+  isAllowedImageFile,
+  isCloudinaryConfigured,
+  uploadImageToCloudinary,
+} from "./cloudinary";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
-async function saveUploadedPhotosLocal(files: File[]): Promise<string[]> {
+export type UploadResult = {
+  paths: string[];
+  errors: string[];
+};
+
+async function saveUploadedPhotosLocal(files: File[]): Promise<UploadResult> {
   await mkdir(UPLOAD_DIR, { recursive: true });
 
-  const savedPaths: string[] = [];
+  const paths: string[] = [];
+  const errors: string[] = [];
 
   for (const file of files) {
-    if (!file.type.startsWith("image/")) continue;
-    if (file.size > 5 * 1024 * 1024) continue;
+    if (!isAllowedImageFile(file)) {
+      errors.push(`"${file.name}" is not a supported image or is over 5 MB.`);
+      continue;
+    }
 
     const ext = file.name.split(".").pop() || "jpg";
     const filename = `${randomUUID()}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-    savedPaths.push(`/uploads/${filename}`);
+    paths.push(`/uploads/${filename}`);
   }
 
-  return savedPaths;
+  return { paths, errors };
 }
 
-export async function saveUploadedPhotos(files: File[]): Promise<string[]> {
+export async function saveUploadedPhotos(files: File[]): Promise<UploadResult> {
   if (isCloudinaryConfigured()) {
-    const savedPaths: string[] = [];
+    const paths: string[] = [];
+    const errors: string[] = [];
+
     for (const file of files) {
-      const url = await uploadImageToCloudinary(file);
-      if (url) savedPaths.push(url);
+      const result = await uploadImageToCloudinary(file);
+      if (result.ok) {
+        paths.push(result.url);
+      } else {
+        errors.push(result.error);
+      }
     }
-    return savedPaths;
+
+    return { paths, errors };
   }
 
   if (process.env.NODE_ENV === "production") {
