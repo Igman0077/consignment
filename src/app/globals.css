@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #f0fdf6;
+  --color-brand-100: #dcfce9;
+  --color-brand-200: #bbf7d4;
+  --color-brand-300: #86efad;
+  --color-brand-400: #4ade80;
+  --color-brand-500: #22c55e;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+  --color-brand-800: #166534;
+  --color-brand-900: #14532d;
+  --font-sans: var(--font-jakarta), "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-slate-100 text-slate-900 antialiased;
+  overflow-x: hidden;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+@layer components {
+  /* Distinct content sections */
+  .page-header {
+    @apply space-y-1;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-slate-900 sm:text-3xl;
+  }
+
+  .page-description {
+    @apply text-base leading-relaxed text-slate-600;
+  }
+
+  .section-block {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .section-block-header {
+    @apply border-b border-slate-100 px-5 py-3 sm:px-6;
+  }
+
+  .section-block-body {
+    @apply px-5 py-4 sm:px-6;
+  }
+
+  .section-title {
+    @apply text-lg font-bold text-slate-900;
+  }
+
+  /* Cards and list rows — clear hover feedback */
+  .panel-interactive {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-150;
+  }
+
+  .panel-interactive:hover {
+    @apply border-slate-300 bg-slate-50 shadow-md;
+  }
+
+  .panel-interactive:focus-within {
+    @apply border-brand-300 bg-brand-50/40 shadow-md;
+  }
+
+  /* Text links */
+  .link-action {
+    @apply font-semibold text-brand-700 underline-offset-2 transition-colors duration-150 hover:bg-brand-50 hover:text-brand-800 hover:underline;
+  }
+
+  .link-danger {
+    @apply inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm font-medium text-red-700 transition-colors duration-150 hover:bg-red-50;
+  }
+
+  /* Top navigation */
+  .nav-pill {
+    @apply flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-all duration-150;
+  }
+
+  .nav-pill:hover {
+    @apply bg-slate-100 text-slate-900;
+  }
+
+  .nav-pill-active {
+    @apply bg-brand-100 text-brand-800 ring-1 ring-brand-200;
+  }
+
+  .nav-pill-active:hover {
+    @apply bg-brand-100 text-brand-900;
+  }
+
+  .back-link {
+    @apply inline-flex min-h-11 w-fit max-w-full items-center gap-2.5 rounded-xl border-2 border-slate-300 bg-white px-4 py-2.5 text-base font-bold text-slate-800 shadow-sm transition-all duration-150 hover:border-brand-500 hover:bg-brand-50 hover:text-brand-800 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+  }
+}
+
+@layer utilities {
+  .container-page {
+    @apply mx-auto w-full max-w-5xl px-4 sm:px-6;
+  }
+
+  .page-stack {
+    @apply space-y-4 sm:space-y-5;
+  }
+
+  .prose-width {
+    @apply max-w-prose;
+  }
+
+  .btn-mobile-full {
+    @apply w-full sm:w-auto;
+  }
+}

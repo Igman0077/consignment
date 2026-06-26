@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  CUSTOMER
+}
+
+enum SaleMode {
+  FIXED_PRICE
+  AUCTION
+  CLAIM
+}
+
+enum ItemStatus {
+  AVAILABLE
+  IN_CART
+  SOLD
+  REMOVED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum SaleEventStatus {
+  SCHEDULED
+  ACTIVE
+  ENDED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  bids         Bid[]
+  cartItems    CartItem[]
+  orders       Order[]
+  claimedItems Item[]   @relation("ClaimedBy")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  items Item[]
+}
+
+model SaleEvent {
+  id                  String          @id @default(cuid())
+  title               String
+  customerMessage     String?
+  startsAt            DateTime
+  endsAt              DateTime
+  status              SaleEventStatus @default(SCHEDULED)
+  allowPreview        Boolean         @default(false)
+  summaryEmailSentAt  DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  items Item[]
+}
+
+model Item {
+  id                String     @id @default(cuid())
+  title             String
+  description       String?
+  photos            String
+  price             Float?
+  saleMode          SaleMode   @default(CLAIM)
+  status            ItemStatus @default(AVAILABLE)
+  quantity          Int        @default(1)
+  quantityAvailable Int        @default(1)
+  category          String?
+  categoryId        String?
+  categoryRef       Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  saleEventId       String?
+  saleEvent         SaleEvent? @relation(fields: [saleEventId], references: [id], onDelete: SetNull)
+  currentBid        Float?
+  bidEndAt          DateTime?
+  auctionClaimFallback Boolean @default(false)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  claimedById String?
+  claimedBy   User?      @relation("ClaimedBy", fields: [claimedById], references: [id])
+  soldAt      DateTime?
+
+  bids       Bid[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+
+model Bid {
+  id        String   @id @default(cuid())
+  amount    Float
+  createdAt DateTime @default(now())
+
+  itemId String
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  price     Float
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId String
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  total              Float
+  status             OrderStatus @default(PENDING)
+  stripeSessionId    String?
+  paidAt             DateTime?
+  invoiceEmailSentAt DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  OrderItem[]
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  price    Float
+  title    String
+  quantity Int    @default(1)
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemId  String
+  item    Item   @relation(fields: [itemId], references: [id])
+}
+
+model ShopSettings {
+  id                   Int      @id @default(1)
+  shopName             String   @default("My Consignment Shop")
+  shopDescription      String?
+  welcomeMessage       String?
+  defaultSaleMode      SaleMode @default(CLAIM)
+  requirePaymentOnline Boolean  @default(true)
+  allowGuestBrowse     Boolean  @default(true)
+  minBidIncrement         Float    @default(1)
+  auctionDurationHours    Int      @default(48)
+  cartHoldMinutes         Int      @default(60)
+  ownerNotificationEmail  String?
+  pickupInstructions      String?
+  updatedAt               DateTime @updatedAt
+}

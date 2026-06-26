@@ -1,0 +1,16 @@
+# Local PostgreSQL for development (production uses Render Postgres)
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: consignment
+      POSTGRES_PASSWORD: consignment
+      POSTGRES_DB: consignment
+    ports:
+      - "5432:5432"
+    volumes:
+      - consignment_pgdata:/var/lib/postgresql/data
+
+volumes:
+  consignment_pgdata:
