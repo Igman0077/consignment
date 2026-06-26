@@ -36,15 +36,19 @@ export default async function AdminItemsPage({
   const query = params.q?.trim() || "";
   const hasFilter = categoryId.length > 0 || query.length > 0;
 
+  const activeInventoryWhere: Prisma.ItemWhereInput = {
+    status: { not: ItemStatus.REMOVED },
+  };
+
   const [categories, totalInventory] = await Promise.all([
     prisma.category.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       select: { id: true, name: true },
     }),
-    prisma.item.count(),
+    prisma.item.count({ where: activeInventoryWhere }),
   ]);
 
-  const where: Prisma.ItemWhereInput = {};
+  const where: Prisma.ItemWhereInput = { ...activeInventoryWhere };
 
   if (categoryId && categoryId !== "all") {
     where.categoryId = categoryId;

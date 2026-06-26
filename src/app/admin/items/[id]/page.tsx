@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requireOwner } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { ItemForm } from "@/components/admin/ItemForm";
+import { ItemStatus } from "@prisma/client";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,7 +18,7 @@ export default async function EditItemPage({ params }: { params: Promise<{ id: s
     prisma.item.findUnique({ where: { id } }),
     prisma.category.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
   ]);
-  if (!item) notFound();
+  if (!item || item.status === ItemStatus.REMOVED) notFound();
 
   return <ItemForm item={item} categories={categories} />;
 }

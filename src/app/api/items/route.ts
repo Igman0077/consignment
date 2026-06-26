@@ -91,6 +91,9 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const items = await prisma.item.findMany({ orderBy: { createdAt: "desc" } });
+  const items = await prisma.item.findMany({
+    where: { status: { not: ItemStatus.REMOVED } },
+    orderBy: { createdAt: "desc" },
+  });
   return NextResponse.json(items);
 }
