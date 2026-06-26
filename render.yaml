@@ -29,6 +29,12 @@ services:
         sync: false
       - key: NEXT_PUBLIC_SHOP_NAME
         value: My Consignment Shop
+      - key: OWNER_INITIAL_PASSWORD
+        sync: false
+      - key: SETUP_SECRET
+        sync: false
+      - key: SEED_MODE
+        value: production
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY

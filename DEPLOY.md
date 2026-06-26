@@ -60,9 +60,22 @@ If you prefer manual setup:
    - **Health check path:** `/api/health`
 3. Add all environment variables from `.env.example`
 
-## 3. Seed the production database (once)
+## 3. Create your owner account (automatic on free tier)
 
-After the first successful deploy:
+On the **free plan**, Render does not include Shell access. The app **creates your owner account automatically** the first time the server starts.
+
+1. In Render → your web service → **Environment**, set:
+   - `OWNER_INITIAL_PASSWORD` → a strong password you choose
+2. Save and redeploy (or wait for the next deploy after pushing the latest code).
+
+Then log in at your Render URL as:
+
+- **Email:** `owner@shop.com`
+- **Password:** the value you set for `OWNER_INITIAL_PASSWORD`
+
+If you skip `OWNER_INITIAL_PASSWORD`, the default is `owner123` — change it by setting that env var and deleting the owner user from the database, or use a paid Render plan and run `npm run db:seed:prod` in Shell.
+
+### Optional: manual seed (Render Shell — paid plans only)
 
 1. Render dashboard → your web service → **Shell**
 2. Run:
@@ -70,8 +83,6 @@ After the first successful deploy:
 ```bash
 OWNER_INITIAL_PASSWORD="YourStrongPassword123" npm run db:seed:prod
 ```
-
-3. Log in as **owner@shop.com** with that password and change settings in the admin dashboard.
 
 The production seed creates the owner account, categories, and shop settings — **no demo items or customers**.
 

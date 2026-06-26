@@ -6,6 +6,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`;
+    const { bootstrapDatabase } = await import("@/lib/bootstrap-database");
+    await bootstrapDatabase();
     return NextResponse.json({ ok: true, database: "connected" });
   } catch {
     return NextResponse.json({ ok: false, database: "disconnected" }, { status: 503 });
