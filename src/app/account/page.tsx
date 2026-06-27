@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -49,6 +50,8 @@ export default async function AccountPage() {
           )}
         </CardBody>
       </Card>
+
+      <ChangePasswordForm />
 
       <section className="section-block">
         <div className="section-block-header flex flex-wrap items-center justify-between gap-2">
