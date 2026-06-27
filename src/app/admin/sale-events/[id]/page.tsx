@@ -5,6 +5,7 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { BackLink } from "@/components/ui/BackLink";
 import { SaleEventDetail } from "@/components/admin/SaleEventDetail";
 import { getSaleEventStats } from "@/lib/sale-event-stats";
+import { ItemStatus } from "@prisma/client";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,7 +17,7 @@ export default async function SaleEventPage({ params }: { params: Promise<{ id: 
   await requireOwner();
   const { id } = await params;
 
-  const [sale, otherSales] = await Promise.all([
+  const [sale, otherSales, availableItems] = await Promise.all([
     prisma.saleEvent.findUnique({
       where: { id },
       include: {
@@ -30,6 +31,17 @@ export default async function SaleEventPage({ params }: { params: Promise<{ id: 
       where: { id: { not: id }, status: { not: "ENDED" } },
       orderBy: { startsAt: "asc" },
       select: { id: true, title: true, status: true },
+    }),
+    prisma.item.findMany({
+      where: {
+        status: { notIn: [ItemStatus.REMOVED, ItemStatus.SOLD] },
+        NOT: { saleEventId: id },
+      },
+      include: {
+        categoryRef: true,
+        saleEvent: { select: { id: true, title: true } },
+      },
+      orderBy: { title: "asc" },
     }),
   ]);
 
@@ -50,6 +62,7 @@ export default async function SaleEventPage({ params }: { params: Promise<{ id: 
         stats={stats}
         items={sale.items}
         otherSales={otherSales}
+        availableItems={availableItems}
       />
     </div>
   );

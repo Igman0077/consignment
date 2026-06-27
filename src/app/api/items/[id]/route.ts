@@ -17,6 +17,7 @@ const itemSchema = z.object({
   photos: z.array(z.string()),
   auctionDurationHours: z.number().int().min(1).optional(),
   auctionClaimFallback: z.boolean().optional(),
+  saleEventId: z.string().nullable().optional(),
 });
 
 async function requireOwnerSession() {
@@ -79,6 +80,20 @@ export async function PUT(
     currentBid = null;
   }
 
+  let saleEventId = existing.saleEventId;
+  if (data.saleEventId !== undefined) {
+    saleEventId = data.saleEventId;
+    if (saleEventId) {
+      const sale = await prisma.saleEvent.findUnique({ where: { id: saleEventId } });
+      if (!sale) {
+        return NextResponse.json({ error: "Selected sale not found" }, { status: 400 });
+      }
+      if (sale.status === "ENDED") {
+        return NextResponse.json({ error: "Cannot assign items to an ended sale" }, { status: 400 });
+      }
+    }
+  }
+
   const item = await prisma.item.update({
     where: { id },
     data: {
@@ -94,6 +109,7 @@ export async function PUT(
       status: data.status,
       bidEndAt,
       currentBid,
+      saleEventId,
       auctionClaimFallback:
         saleMode === SaleMode.AUCTION ? data.auctionClaimFallback ?? false : false,
     },

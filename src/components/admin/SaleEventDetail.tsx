@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/utils";
 import { SaleEventStats } from "@/lib/sale-event-stats";
 import { SaleEventStatsPanel } from "@/components/admin/SaleEventStatsPanel";
 import { SaleEventItemsPanel } from "@/components/admin/SaleEventItemsPanel";
+import { SaleEventAddItemsPanel } from "@/components/admin/SaleEventAddItemsPanel";
 import { Item, Category } from "@prisma/client";
 import { Eye } from "lucide-react";
 
@@ -21,11 +22,16 @@ export function SaleEventDetail({
   stats,
   items,
   otherSales,
+  availableItems,
 }: {
   sale: SaleEvent;
   stats: SaleEventStats | null;
   items: (Item & { categoryRef: Category | null })[];
   otherSales: Pick<SaleEvent, "id" | "title" | "status">[];
+  availableItems: (Item & {
+    categoryRef: Category | null;
+    saleEvent: { id: string; title: string } | null;
+  })[];
 }) {
   return (
     <div className="page-stack">
@@ -80,6 +86,12 @@ export function SaleEventDetail({
       </Card>
 
       {stats && <SaleEventStatsPanel stats={stats} status={sale.status} />}
+
+      <SaleEventAddItemsPanel
+        saleId={sale.id}
+        saleStatus={sale.status}
+        availableItems={availableItems}
+      />
 
       <SaleEventItemsPanel
         saleId={sale.id}

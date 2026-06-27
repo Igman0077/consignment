@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Item, SaleMode, ItemStatus, Category } from "@prisma/client";
+import { Item, SaleMode, ItemStatus, Category, SaleEvent } from "@prisma/client";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -21,12 +21,14 @@ type ItemFormProps = {
   item?: Item;
   defaultSaleMode?: SaleMode;
   categories: Category[];
+  sales?: Pick<SaleEvent, "id" | "title" | "status">[];
 };
 
 export function ItemForm({
   item,
   defaultSaleMode = "CLAIM",
   categories,
+  sales = [],
 }: ItemFormProps) {
   const router = useRouter();
   const isEdit = !!item;
@@ -89,6 +91,10 @@ export function ItemForm({
           : undefined,
       auctionClaimFallback:
         saleMode === "AUCTION" && formData.get("auctionClaimFallback") === "on",
+      saleEventId: (() => {
+        const value = formData.get("saleEventId") as string;
+        return value && value !== "none" ? value : null;
+      })(),
     };
 
     const url = isEdit ? `/api/items/${item.id}` : "/api/items";
@@ -193,8 +199,22 @@ export function ItemForm({
               min="1"
               required
               defaultValue={item?.quantity ?? 1}
-              hint="How many of this item are for sale (e.g. 3 identical mugs). Assign items to a sale from Scheduled Sales."
+              hint="How many of this item are for sale (e.g. 3 identical mugs)."
             />
+
+            <Select
+              label="Assign to sale"
+              name="saleEventId"
+              defaultValue={item?.saleEventId ?? "none"}
+              hint="Optional — pick a scheduled or active sale, or leave in inventory only"
+            >
+              <option value="none">No sale — inventory only</option>
+              {sales.map((sale) => (
+                <option key={sale.id} value={sale.id}>
+                  {sale.title} ({sale.status.toLowerCase()})
+                </option>
+              ))}
+            </Select>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Input

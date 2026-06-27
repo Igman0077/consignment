@@ -120,11 +120,27 @@ export async function POST(
   if (!sale) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   if (action === "add-items" && Array.isArray(itemIds)) {
+    const validItems = await prisma.item.findMany({
+      where: {
+        id: { in: itemIds },
+        status: { notIn: ["REMOVED", "SOLD"] },
+      },
+      select: { id: true },
+    });
+
+    if (validItems.length === 0) {
+      return NextResponse.json({ error: "No valid items to add" }, { status: 400 });
+    }
+
+    if (sale.status === SaleEventStatus.ENDED) {
+      return NextResponse.json({ error: "Cannot add items to an ended sale" }, { status: 400 });
+    }
+
     await prisma.item.updateMany({
-      where: { id: { in: itemIds } },
+      where: { id: { in: validItems.map((i) => i.id) } },
       data: { saleEventId: id },
     });
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, added: validItems.length });
   }
 
   if (action === "remove-items" && Array.isArray(itemIds)) {
