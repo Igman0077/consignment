@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { saveUploadedPhotos } from "@/lib/upload";
 import { stringifyPhotos } from "@/lib/utils";
 import { SaleMode, ItemStatus } from "@prisma/client";
 import { z } from "zod";
@@ -70,7 +69,7 @@ export async function POST(req: Request) {
 
   const quantity = data.quantity;
 
-  let saleEventId: string | null = data.saleEventId ?? null;
+  const saleEventId: string | null = data.saleEventId ?? null;
   if (saleEventId) {
     const sale = await prisma.saleEvent.findUnique({ where: { id: saleEventId } });
     if (!sale) {

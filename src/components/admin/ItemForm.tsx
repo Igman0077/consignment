@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Item, SaleMode, ItemStatus, Category, SaleEvent } from "@prisma/client";
+import { Item, SaleMode, Category, SaleEvent } from "@prisma/client";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
