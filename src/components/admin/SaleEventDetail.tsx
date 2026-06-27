@@ -23,6 +23,7 @@ export function SaleEventDetail({
   items,
   otherSales,
   availableItems,
+  categories,
 }: {
   sale: SaleEvent;
   stats: SaleEventStats | null;
@@ -32,6 +33,7 @@ export function SaleEventDetail({
     categoryRef: Category | null;
     saleEvent: { id: string; title: string } | null;
   })[];
+  categories: Pick<Category, "id" | "name">[];
 }) {
   return (
     <div className="page-stack">
@@ -90,7 +92,9 @@ export function SaleEventDetail({
       <SaleEventAddItemsPanel
         saleId={sale.id}
         saleStatus={sale.status}
+        saleTitle={sale.title}
         availableItems={availableItems}
+        categories={categories}
       />
 
       <SaleEventItemsPanel

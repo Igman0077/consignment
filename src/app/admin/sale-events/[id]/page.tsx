@@ -17,7 +17,7 @@ export default async function SaleEventPage({ params }: { params: Promise<{ id: 
   await requireOwner();
   const { id } = await params;
 
-  const [sale, otherSales, availableItems] = await Promise.all([
+  const [sale, otherSales, availableItems, categories] = await Promise.all([
     prisma.saleEvent.findUnique({
       where: { id },
       include: {
@@ -43,6 +43,10 @@ export default async function SaleEventPage({ params }: { params: Promise<{ id: 
       },
       orderBy: { title: "asc" },
     }),
+    prisma.category.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      select: { id: true, name: true },
+    }),
   ]);
 
   if (!sale) notFound();
@@ -53,7 +57,7 @@ export default async function SaleEventPage({ params }: { params: Promise<{ id: 
       : null;
 
   return (
-    <div className="container-page max-w-3xl page-stack">
+    <div className="container-page max-w-5xl page-stack">
       <BackLink href="/admin/sale-events">All scheduled sales</BackLink>
 
       <AdminNav />
@@ -63,6 +67,7 @@ export default async function SaleEventPage({ params }: { params: Promise<{ id: 
         items={sale.items}
         otherSales={otherSales}
         availableItems={availableItems}
+        categories={categories}
       />
     </div>
   );
