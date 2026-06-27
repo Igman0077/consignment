@@ -35,7 +35,7 @@ export default async function SaleEventPage({ params }: { params: Promise<{ id: 
     prisma.item.findMany({
       where: {
         status: { notIn: [ItemStatus.REMOVED, ItemStatus.SOLD] },
-        NOT: { saleEventId: id },
+        OR: [{ saleEventId: null }, { saleEventId: { not: id } }],
       },
       include: {
         categoryRef: true,
