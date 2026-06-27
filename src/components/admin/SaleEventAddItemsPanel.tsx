@@ -19,7 +19,7 @@ type AvailableItem = Item & {
   saleEvent: { id: string; title: string } | null;
 };
 
-type FilterTab = "unassigned" | "other-sale" | "all";
+type FilterTab = "unassigned" | "other-sale";
 
 function matchesSearch(item: AvailableItem, query: string): boolean {
   const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -38,8 +38,7 @@ function matchesSearch(item: AvailableItem, query: string): boolean {
 
 function matchesTab(item: AvailableItem, tab: FilterTab): boolean {
   if (tab === "unassigned") return !item.saleEventId;
-  if (tab === "other-sale") return Boolean(item.saleEventId);
-  return true;
+  return Boolean(item.saleEventId);
 }
 
 export function SaleEventAddItemsPanel({
@@ -71,7 +70,7 @@ export function SaleEventAddItemsPanel({
   const counts = useMemo(() => {
     const unassigned = availableItems.filter((i) => !i.saleEventId).length;
     const inOther = availableItems.filter((i) => i.saleEventId).length;
-    return { unassigned, inOther, all: availableItems.length };
+    return { unassigned, inOther };
   }, [availableItems]);
 
   const filtered = useMemo(() => {
@@ -94,12 +93,6 @@ export function SaleEventAddItemsPanel({
       label: "In another sale",
       count: counts.inOther,
       hint: "Will move from their current sale to this one",
-    },
-    {
-      id: "all",
-      label: "All available",
-      count: counts.all,
-      hint: "Everything you can add to this sale",
     },
   ];
 
@@ -181,7 +174,6 @@ export function SaleEventAddItemsPanel({
         <div className="flex flex-wrap gap-2">
           <Badge variant="success">{counts.unassigned} not in a sale</Badge>
           <Badge variant="warning">{counts.inOther} in another sale</Badge>
-          <Badge variant="info">{counts.all} total available</Badge>
         </div>
 
         {/* Tabs */}
@@ -294,7 +286,7 @@ export function SaleEventAddItemsPanel({
               onClick={() => {
                 setSearch("");
                 setCategoryId("all");
-                if (tab !== "all") setTab("all");
+                setTab("unassigned");
               }}
             >
               Clear filters
@@ -394,7 +386,7 @@ export function SaleEventAddItemsPanel({
             </ul>
 
             <p className="text-center text-sm text-slate-500">
-              Showing {filtered.length} of {counts.all} available items
+              Showing {filtered.length} item{filtered.length !== 1 ? "s" : ""}
             </p>
           </>
         )}
